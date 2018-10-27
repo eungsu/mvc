@@ -38,6 +38,11 @@ public class FrontControllerServlet extends HttpServlet {
 			
 			requestMappingMethodMap = RequestMappingAnnotationProcessor.process(clazz);
 			
+			Set<String> keys = requestMappingMethodMap.keySet();
+			for (String key : keys) {
+				System.out.println("["+key+"] " + requestMappingMethodMap.get(key));
+			}
+			
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
@@ -50,9 +55,7 @@ public class FrontControllerServlet extends HttpServlet {
 		
 		String contextPath = request.getContextPath();
 		String requestURI = request.getRequestURI();
-		if (!contextPath.equals("/")) {
-			requestURI = requestURI.replace(contextPath, "");
-		}
+		requestURI = getRequestURI(contextPath, requestURI);
 		
 		if (!requestMappingMethodMap.containsKey(requestURI)) {
 			throw new ServletException("요청 URI ["+requestURI+"]와 매핑되는 메소드가 존재하지 않습니다.");
@@ -75,15 +78,15 @@ public class FrontControllerServlet extends HttpServlet {
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
+	}
+	
+	private String getRequestURI(String contextPath, String requestURI) {
 		
+		if (contextPath.equals("/")) {
+			return requestURI;
+		}
 		
-//		if (path.startsWith("redirect:")) {
-//			path = path.replace("redirect:", "");
-//			response.sendRedirect(path);
-//		} else {
-//			path = "WEB-INF/views/" + path;
-//			request.getRequestDispatcher(path).forward(request, response);
-//		}
+		return requestURI.substring(contextPath.length());
 	}
 	
 	private void handleModelAndView(ModelAndView modelAndView, HttpServletRequest request, HttpServletResponse response) throws Exception {

@@ -2,7 +2,7 @@ package kr.co.jhta.mvc.view;
 
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,16 +20,52 @@ public class JSONView implements View {
 		PrintWriter out = response.getWriter();
 		
 		GsonBuilder builder = new GsonBuilder();
-		builder.setPrettyPrinting().serializeNulls();
+		builder.setPrettyPrinting()
+			.setDateFormat("yyyy-MM-dd")
+			.serializeNulls();
 		Gson gson = builder.create();
 
-		Set<String> keySet = model.keySet();
-		if (keySet.size() != 1) {
-			out.println(gson.toJson(model));
-		} else {
-			for (String key : keySet) {
-				out.println(gson.toJson(model.get(key)));
+		if (model.size() == 1) {
+			String key = new TreeSet<>(model.keySet()).first();
+			Object value = model.get(key);
+			if (isPrimitiveValue(value)) {
+				out.println(gson.toJson(model));
+			} else {
+				out.print(gson.toJson(value));
 			}
+		} else {
+			out.println(gson.toJson(model));
 		}
+	}
+	
+	private boolean isPrimitiveValue(Object value) {
+		if (value instanceof Boolean) {
+			return true;
+		}
+		if (value instanceof Byte) {
+			return true;
+		}
+		if (value instanceof Short) {
+			return true;
+		}
+		if (value instanceof Integer) {
+			return true;
+		}
+		if (value instanceof Long) {
+			return true;
+		}
+		if (value instanceof Float) {
+			return true;
+		}
+		if (value instanceof Double) {
+			return true;
+		}
+		if (value instanceof Character) {
+			return true;
+		}
+		if (value instanceof String) {
+			return true;
+		}
+		return false;
 	}
 }
