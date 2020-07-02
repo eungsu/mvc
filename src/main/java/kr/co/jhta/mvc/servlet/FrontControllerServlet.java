@@ -72,6 +72,9 @@ public class FrontControllerServlet extends HttpServlet {
 		if (modelAndView == null) {
 			throw new ServletException("컨트롤러 메소드 ["+methodInfo.getMethod().getName()+"] 은 ModelAndView가 비어있습니다.");
 		}
+		if (modelAndView.getView() == null && modelAndView.getViewName() == null) {
+			throw new ServletException("컨트롤러 메소드 ["+methodInfo.getMethod().getName()+"] 은 ModelAndView의 viewName이 비어있습니다.");
+		}
 		
 		try {
 			handleModelAndView(modelAndView, request, response);
