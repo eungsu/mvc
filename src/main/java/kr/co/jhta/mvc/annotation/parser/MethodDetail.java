@@ -2,14 +2,25 @@ package kr.co.jhta.mvc.annotation.parser;
 
 import java.lang.reflect.Method;
 
-public class MethodInfo {
+import kr.co.jhta.mvc.annotation.method.RequestMethod;
 
+public class MethodDetail {
+
+	private RequestMethod requestMethod;
 	private String path;
 	private String className;
 	private Method method;
 	
-	public MethodInfo() {}
+	public MethodDetail() {}
 
+	public RequestMethod getRequestMethod() {
+		return requestMethod;
+	}
+	
+	public void setRequestMethod(RequestMethod requestMethod) {
+		this.requestMethod = requestMethod;
+	}
+	
 	public String getPath() {
 		return path;
 	}
@@ -36,7 +47,7 @@ public class MethodInfo {
 
 	@Override
 	public String toString() {
-		return "MethodInfo [path=" + path + ", className=" + className + ", method=" + method.getName() + "]";
+		return "[path=" + path + ", requestMethod=" + requestMethod +", className=" + className + ", method=" + method.getName() + "]";
 	}
 
 	

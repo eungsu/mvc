@@ -12,6 +12,10 @@ public class ModelAndView {
 	private View view;
 	
 	public ModelAndView() {}
+	
+	public ModelAndView(String viewName) {
+		this.viewName = viewName;
+	}
 
 	Map<String, Object> getModel() {
 		return model;

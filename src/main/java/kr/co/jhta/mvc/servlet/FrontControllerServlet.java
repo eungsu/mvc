@@ -5,23 +5,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import kr.co.jhta.mvc.annotation.method.RequestMethod;
 import kr.co.jhta.mvc.annotation.parser.ControllerAnnotationProcessor;
-import kr.co.jhta.mvc.annotation.parser.MethodInfo;
+import kr.co.jhta.mvc.annotation.parser.MethodDetail;
+import kr.co.jhta.mvc.annotation.parser.MethodKey;
 import kr.co.jhta.mvc.annotation.parser.RequestMappingAnnotationProcessor;
 import kr.co.jhta.mvc.view.ForwardView;
 import kr.co.jhta.mvc.view.RedirectView;
 import kr.co.jhta.mvc.view.View;
 
 public class FrontControllerServlet extends HttpServlet { 
-	
+	private static final long serialVersionUID = -5311977520092694652L;
+
 	private Map<String, Object> controllerObjectMap = new HashMap<String, Object>();
-	private Map<String, MethodInfo> requestMappingMethodMap = new HashMap<String, MethodInfo>();
+	private Map<MethodKey, MethodDetail> requestMappingMethodMap = new HashMap<MethodKey, MethodDetail>();
 	
 	@Override
 	public void init() throws ServletException {
@@ -32,15 +34,15 @@ public class FrontControllerServlet extends HttpServlet {
 		
 			Set<Class<?>> clazz = ControllerAnnotationProcessor.scanClass(packages);
 			for (Class<?> claz : clazz) {
-				Object object = claz.newInstance();
+				Object object = claz.getDeclaredConstructor().newInstance();
 				controllerObjectMap.put(claz.getName(), object);
 			}
 			
 			requestMappingMethodMap = RequestMappingAnnotationProcessor.process(clazz);
 			
-			Set<String> keys = requestMappingMethodMap.keySet();
-			for (String key : keys) {
-				System.out.println("["+key+"] " + requestMappingMethodMap.get(key));
+			Set<MethodKey> keys = requestMappingMethodMap.keySet();
+			for (MethodKey key : keys) {
+				System.out.println("["+key.getPath()+"] " + requestMappingMethodMap.get(key));
 			}
 			
 		} catch (Exception e) {
@@ -53,15 +55,18 @@ public class FrontControllerServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("utf-8");
 		
+		String method = request.getMethod();
 		String contextPath = request.getContextPath();
 		String requestURI = request.getRequestURI();
 		requestURI = getRequestURI(contextPath, requestURI);
 		
-		if (!requestMappingMethodMap.containsKey(requestURI)) {
+		MethodKey methodKey = new MethodKey(RequestMethod.valueOf(method), requestURI);
+		
+		if (!requestMappingMethodMap.containsKey(methodKey)) {
 			throw new ServletException("요청 URI ["+requestURI+"]와 매핑되는 메소드가 존재하지 않습니다.");
 		}
 		
-		MethodInfo methodInfo = requestMappingMethodMap.get(requestURI);
+		MethodDetail methodInfo = requestMappingMethodMap.get(methodKey);
 		ModelAndView modelAndView = null;
 		try {
 			modelAndView = (ModelAndView) methodInfo.getMethod().invoke(controllerObjectMap.get(methodInfo.getClassName()), request, response);

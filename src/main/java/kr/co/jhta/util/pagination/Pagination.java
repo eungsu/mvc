@@ -39,6 +39,10 @@ public class Pagination {
 		return page;
 	}
 	
+	public int getSize() {
+		return size;
+	}
+	
 	public boolean isFirst() {
 		if (page == 1) {
 			return true;
